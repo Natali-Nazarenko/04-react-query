@@ -1,5 +1,6 @@
 import toast, { Toaster } from 'react-hot-toast';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 
 import SearchBar from '../SearchBar/SearchBar';
 import MovieGrid from '../MovieGrid/MovieGrid';
@@ -13,29 +14,21 @@ import type { Movie } from '../../types/movie';
 const notify = () => toast.error('No movies found for your request.');
 
 function App() {
-    const [isLoading, setIsLoading] = useState<boolean>(false);
-    const [isError, setIsError] = useState<boolean>(false);
-    const [movies, setMovies] = useState<Movie[]>([]);
     const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
+    const [request, setRequest] = useState('');
 
-    const handleRequest = async (request: string) => {
-        try {
-            setIsLoading(true);
-            setIsError(false);
-            setMovies([]);
+    const { data, isLoading, isError } = useQuery({
+        queryKey: ['movies', request],
+        queryFn: () => fetchMovies(request),
+        enabled: request !== '',
+    });
 
-            const arrMovies = await fetchMovies(request);
+    useEffect(() => {
+        if (data?.length === 0) notify();
+    }, [data]);
 
-            if (arrMovies.length === 0) {
-                notify();
-                return;
-            }
-            setMovies(arrMovies);
-        } catch {
-            setIsError(true);
-        } finally {
-            setIsLoading(false);
-        }
+    const handleRequest = (request: string) => {
+        setRequest(request);
     };
 
     const openModal = (movie: Movie) => {
@@ -48,7 +41,7 @@ function App() {
             <SearchBar onSubmit={handleRequest} />
             {isLoading && <Loader />}
             {isError && <ErrorMessage />}
-            <MovieGrid onSelect={openModal} movies={movies} />
+            <MovieGrid onSelect={openModal} movies={data ?? []} />
             {selectedMovie && <MovieModal movie={selectedMovie} onClose={closeModal} />}
             <Toaster />
             {}
