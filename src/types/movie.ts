@@ -1,3 +1,9 @@
+export interface Movies {
+    page: number;
+    results: Movie[];
+    total_pages: number;
+}
+
 export interface Movie {
     id: number;
     poster_path: string;

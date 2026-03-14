@@ -1,18 +1,21 @@
 import axios from 'axios';
-import type { Movie } from '../types/movie';
+import type { Movies } from '../types/movie';
 
-interface ApiResponse {
-    results: Movie[];
-}
+// interface ApiResponse {
+//     page: number;
+//     results: Movie[];
+//     total_pages: number;
+// }
 
 const myKey = import.meta.env.VITE_API_KEY;
 const url = 'https://api.themoviedb.org/3/search/movie';
 
-export async function fetchMovies(request: string): Promise<Movie[]> {
+export async function fetchMovies(request: string, page: number): Promise<Movies> {
     const options = {
         method: 'GET',
         params: {
             query: request,
+            page,
         },
         headers: {
             accept: 'application/json',
@@ -20,6 +23,6 @@ export async function fetchMovies(request: string): Promise<Movie[]> {
         },
     };
 
-    const { data } = await axios.get<ApiResponse>(url, options);
-    return data.results;
+    const { data } = await axios.get<Movies>(url, options);
+    return data;
 }
