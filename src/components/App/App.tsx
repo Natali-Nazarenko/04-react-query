@@ -24,6 +24,8 @@ function App() {
         queryKey: ['movies', request, page],
         queryFn: () => fetchMovies(request as string, page),
         enabled: request !== null,
+        staleTime: 1000 * 60 * 5,
+        placeholderData: previousData => previousData,
     });
 
     const totalPages = data?.total_pages ?? 0;
